@@ -1,12 +1,29 @@
 import { useEffect, useState } from 'react'
 import logo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
   const [todos, setTodos] = useState([]);
   const [taskdescription, setTaskdescription] = useState("");
+  const [completedTasks, setCompletedTasks] = useState({});
+
+  const loadTodos = () => {
+    fetch("http://localhost:8080/")
+      .then(response => response.json())
+      .then(data => {
+        setTodos(data);
+        setCompletedTasks((prevCompletedTasks) => {
+          const nextCompletedTasks = {};
+          data.forEach((todo) => {
+            if (prevCompletedTasks[todo.taskdescription]) {
+              nextCompletedTasks[todo.taskdescription] = true;
+            }
+          });
+          return nextCompletedTasks;
+        });
+      })
+      .catch(error => console.log(error));
+  }
 
   /** Is called when the html form is submitted. It sends a POST request to the API endpoint '/tasks' and updates the component's state with the new todo.
   ** In this case a new taskdecription is added to the actual list on the server.
@@ -24,7 +41,7 @@ function App() {
     .then(response => {
       console.log("Receiving answer after sending to Spring-Server: ");
       console.log(response);
-      window.location.href = "/";
+      loadTodos();
       setTaskdescription("");             // clear input field, preparing it for the next input
     })
     .catch(error => console.log(error))
@@ -46,16 +63,14 @@ function App() {
   ** It updates the component's state with the fetched todos from the API Endpoint '/'.
   */
   useEffect(() => {
-    fetch("http://localhost:8080/").then(response => response.json()).then(data => {
-      setTodos(data);
-    });
+    loadTodos();
   }, []);
 
 
- /** Is called when the Done-Button is pressed. It sends a POST request to the API endpoint '/delete' and updates the component's state with the new todo.
+ /** Is called when the delete button is pressed. It sends a POST request to the API endpoint '/delete' and updates the component's state with the new todo.
   ** In this case if the task with the unique taskdescription is found on the server, it will be removed from the list.
   */
-  const handleDelete = (event, taskdescription) => {
+  const handleDelete = (taskdescription) => {
     console.log("Sending task description to delete on Spring-Server: "+taskdescription);
     fetch(`http://localhost:8080/delete`, { // API endpoint (the complete URL!) to delete an existing taskdescription in the list
       method: "POST",
@@ -67,9 +82,21 @@ function App() {
     .then(response => {
       console.log("Receiving answer after deleting on Spring-Server: ");
       console.log(response);
-      window.location.href = "/";
+      setCompletedTasks((prevCompletedTasks) => {
+        const nextCompletedTasks = { ...prevCompletedTasks };
+        delete nextCompletedTasks[taskdescription];
+        return nextCompletedTasks;
+      });
+      loadTodos();
     })
     .catch(error => console.log(error))
+  }
+
+  const handleToggleDone = (taskdescription) => {
+    setCompletedTasks((prevCompletedTasks) => ({
+      ...prevCompletedTasks,
+      [taskdescription]: !prevCompletedTasks[taskdescription]
+    }));
   }
 
   /**
@@ -82,8 +109,27 @@ function App() {
       <ul className="todo-list">
         {todos.map((todo, index) => (
           <li key={todo.taskdescription}>
-            <span>{"Task " + (index+1) + ": "+ todo.taskdescription}</span>
-            <button onClick={(event) => handleDelete(event, todo.taskdescription) }>&#10004;</button>
+            <span className={completedTasks[todo.taskdescription] ? "todo-done" : ""}>
+              {"Task " + (index+1) + ": "+ todo.taskdescription}
+            </span>
+            <div className="todo-actions">
+              <button
+                type="button"
+                className={`done-btn ${completedTasks[todo.taskdescription] ? "is-done" : ""}`}
+                onClick={() => handleToggleDone(todo.taskdescription)}
+                title="Als erledigt markieren"
+              >
+                &#10004;
+              </button>
+              <button
+                type="button"
+                className="delete-btn"
+                onClick={() => handleDelete(todo.taskdescription)}
+                title="Todo loeschen"
+              >
+                X
+              </button>
+            </div>
           </li>
         ))}
       </ul>
