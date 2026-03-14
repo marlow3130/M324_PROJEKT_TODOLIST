@@ -6,6 +6,18 @@ function App() {
   const [todos, setTodos] = useState([]);
   const [taskdescription, setTaskdescription] = useState("");
   const [completedTasks, setCompletedTasks] = useState({});
+  const [completedHistory, setCompletedHistory] = useState(() => {
+    const historyFromStorage = localStorage.getItem("completedHistory");
+    if (!historyFromStorage) {
+      return [];
+    }
+    try {
+      return JSON.parse(historyFromStorage);
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
+  });
 
   const loadTodos = () => {
     fetch("http://localhost:8080/")
@@ -66,6 +78,10 @@ function App() {
     loadTodos();
   }, []);
 
+  useEffect(() => {
+    localStorage.setItem("completedHistory", JSON.stringify(completedHistory));
+  }, [completedHistory]);
+
 
  /** Is called when the delete button is pressed. It sends a POST request to the API endpoint '/delete' and updates the component's state with the new todo.
   ** In this case if the task with the unique taskdescription is found on the server, it will be removed from the list.
@@ -93,10 +109,29 @@ function App() {
   }
 
   const handleToggleDone = (taskdescription) => {
-    setCompletedTasks((prevCompletedTasks) => ({
-      ...prevCompletedTasks,
-      [taskdescription]: !prevCompletedTasks[taskdescription]
-    }));
+    setCompletedTasks((prevCompletedTasks) => {
+      const willBeDone = !prevCompletedTasks[taskdescription];
+
+      if (willBeDone) {
+        setCompletedHistory((prevHistory) => {
+          if (prevHistory.some((entry) => entry.taskdescription === taskdescription)) {
+            return prevHistory;
+          }
+          return [
+            ...prevHistory,
+            {
+              taskdescription,
+              completedAt: new Date().toLocaleString("de-CH")
+            }
+          ];
+        });
+      }
+
+      return {
+        ...prevCompletedTasks,
+        [taskdescription]: willBeDone
+      };
+    });
   }
 
   /**
@@ -136,6 +171,23 @@ function App() {
     );
   }
 
+  const renderHistory = (history) => {
+    if (history.length === 0) {
+      return <p className="history-empty">Noch keine erledigten Todos.</p>;
+    }
+
+    return (
+      <ul className="history-list">
+        {history.map((entry, index) => (
+          <li key={`${entry.taskdescription}-${entry.completedAt}`}>
+            <span>{`${index + 1}. ${entry.taskdescription}`}</span>
+            <span className="history-time">{entry.completedAt}</span>
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
   return (
     <div className="App">
       <header className="App-header">
@@ -155,6 +207,10 @@ function App() {
         <div>
           {renderTasks(todos)}
         </div>
+        <section className="history-section">
+          <h2>ToDo History</h2>
+          {renderHistory(completedHistory)}
+        </section>
       </header>
     </div>
   );
