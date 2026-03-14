@@ -6,6 +6,7 @@ function App() {
   const [todos, setTodos] = useState([]);
   const [taskdescription, setTaskdescription] = useState("");
   const [completedTasks, setCompletedTasks] = useState({});
+  const [selectedTasks, setSelectedTasks] = useState({});
   const [completedHistory, setCompletedHistory] = useState(() => {
     const historyFromStorage = localStorage.getItem("completedHistory");
     if (!historyFromStorage) {
@@ -32,6 +33,15 @@ function App() {
             }
           });
           return nextCompletedTasks;
+        });
+        setSelectedTasks((prevSelectedTasks) => {
+          const nextSelectedTasks = {};
+          data.forEach((todo) => {
+            if (prevSelectedTasks[todo.taskdescription]) {
+              nextSelectedTasks[todo.taskdescription] = true;
+            }
+          });
+          return nextSelectedTasks;
         });
       })
       .catch(error => console.log(error));
@@ -103,6 +113,11 @@ function App() {
         delete nextCompletedTasks[taskdescription];
         return nextCompletedTasks;
       });
+      setSelectedTasks((prevSelectedTasks) => {
+        const nextSelectedTasks = { ...prevSelectedTasks };
+        delete nextSelectedTasks[taskdescription];
+        return nextSelectedTasks;
+      });
       loadTodos();
     })
     .catch(error => console.log(error))
@@ -134,16 +149,142 @@ function App() {
     });
   }
 
+  const handleToggleSelect = (taskdescription) => {
+    setSelectedTasks((prevSelectedTasks) => ({
+      ...prevSelectedTasks,
+      [taskdescription]: !prevSelectedTasks[taskdescription]
+    }));
+  }
+
+  const handleToggleSelectAll = () => {
+    const allSelected = todos.length > 0 && todos.every((todo) => selectedTasks[todo.taskdescription]);
+
+    if (allSelected) {
+      setSelectedTasks({});
+      return;
+    }
+
+    const nextSelectedTasks = {};
+    todos.forEach((todo) => {
+      nextSelectedTasks[todo.taskdescription] = true;
+    });
+    setSelectedTasks(nextSelectedTasks);
+  }
+
+  const handleMarkSelectedDone = () => {
+    const selectedTaskDescriptions = todos
+      .filter((todo) => selectedTasks[todo.taskdescription])
+      .map((todo) => todo.taskdescription);
+
+    if (selectedTaskDescriptions.length === 0) {
+      return;
+    }
+
+    const completedAt = new Date().toLocaleString("de-CH");
+
+    setCompletedTasks((prevCompletedTasks) => {
+      const nextCompletedTasks = { ...prevCompletedTasks };
+      selectedTaskDescriptions.forEach((taskdescription) => {
+        nextCompletedTasks[taskdescription] = true;
+      });
+      return nextCompletedTasks;
+    });
+
+    setCompletedHistory((prevHistory) => {
+      const alreadyInHistory = new Set(prevHistory.map((entry) => entry.taskdescription));
+      const newEntries = selectedTaskDescriptions
+        .filter((taskdescription) => !alreadyInHistory.has(taskdescription))
+        .map((taskdescription) => ({ taskdescription, completedAt }));
+      return [...prevHistory, ...newEntries];
+    });
+
+    setSelectedTasks({});
+  }
+
+  const handleDeleteSelected = () => {
+    const selectedTaskDescriptions = todos
+      .filter((todo) => selectedTasks[todo.taskdescription])
+      .map((todo) => todo.taskdescription);
+
+    if (selectedTaskDescriptions.length === 0) {
+      return;
+    }
+
+    Promise.all(
+      selectedTaskDescriptions.map((taskdescription) =>
+        fetch("http://localhost:8080/delete", {
+          method: "POST",
+          body: JSON.stringify({ taskdescription }),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        })
+      )
+    )
+      .then(() => {
+        setCompletedTasks((prevCompletedTasks) => {
+          const nextCompletedTasks = { ...prevCompletedTasks };
+          selectedTaskDescriptions.forEach((taskdescription) => {
+            delete nextCompletedTasks[taskdescription];
+          });
+          return nextCompletedTasks;
+        });
+        setSelectedTasks({});
+        loadTodos();
+      })
+      .catch(error => console.log(error));
+  }
+
   /**
    * render all task lines
    * @param {*} todos : Task list
    * @returns html code snippet
   */
   const renderTasks = (todos) => {
+    const selectedCount = todos.filter((todo) => selectedTasks[todo.taskdescription]).length;
+    const allSelected = todos.length > 0 && selectedCount === todos.length;
+
     return (
-      <ul className="todo-list">
-        {todos.map((todo, index) => (
-          <li key={todo.taskdescription}>
+      <>
+        <div className="group-select-bar">
+          <label className="select-all-control">
+            <input
+              type="checkbox"
+              checked={allSelected}
+              onChange={handleToggleSelectAll}
+            />
+            <span>Alle markieren</span>
+          </label>
+          <div className="group-actions">
+            <span className="selected-count">{selectedCount} ausgewaehlt</span>
+            <button
+              type="button"
+              className="bulk-btn bulk-done"
+              onClick={handleMarkSelectedDone}
+              disabled={selectedCount === 0}
+            >
+              Ausgewaehlte erledigen
+            </button>
+            <button
+              type="button"
+              className="bulk-btn bulk-delete"
+              onClick={handleDeleteSelected}
+              disabled={selectedCount === 0}
+            >
+              Ausgewaehlte loeschen
+            </button>
+          </div>
+        </div>
+        <ul className="todo-list">
+          {todos.map((todo, index) => (
+            <li key={todo.taskdescription} className={selectedTasks[todo.taskdescription] ? "todo-selected" : ""}>
+              <input
+                type="checkbox"
+                className="todo-select-checkbox"
+                checked={!!selectedTasks[todo.taskdescription]}
+                onChange={() => handleToggleSelect(todo.taskdescription)}
+                title="Todo fuer Gruppenauswahl markieren"
+              />
             <span className={completedTasks[todo.taskdescription] ? "todo-done" : ""}>
               {"Task " + (index+1) + ": "+ todo.taskdescription}
             </span>
@@ -165,9 +306,10 @@ function App() {
                 X
               </button>
             </div>
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      </>
     );
   }
 
