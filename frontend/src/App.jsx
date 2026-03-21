@@ -303,7 +303,7 @@ function App() {
                 onClick={() => handleDelete(todo.taskdescription)}
                 title="Todo loeschen"
               >
-                X
+                &#128465;
               </button>
             </div>
             </li>
