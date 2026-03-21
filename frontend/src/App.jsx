@@ -256,7 +256,10 @@ function App() {
             <span>Alle markieren</span>
           </label>
           <div className="group-actions">
-            <span className="selected-count">{selectedCount} ausgewaehlt</span>
+            {/* Zaehler: zeigt dynamisch an, wie viele Tasks aktuell ausgewaehlt sind */}
+            <span className={`selected-count ${selectedCount > 0 ? "has-selection" : ""}`}>
+              {selectedCount} von {todos.length} ausgewaehlt
+            </span>
             <button
               type="button"
               className="bulk-btn bulk-done"

@@ -54,9 +54,19 @@
   gap: 0.45rem;
 }
 
+/* Zaehler "X ausgewaehlt" - zeigt Anzahl der markierten Tasks */
 .selected-count {
-  opacity: 0.85;
+  opacity: 0.65;
   font-size: 0.95rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  transition: opacity 0.2s, background 0.2s;
+}
+
+.selected-count.has-selection {
+  opacity: 1;
+  background: rgba(21, 101, 192, 0.2);
+  font-weight: bold;
 }
 
 .group-actions {
