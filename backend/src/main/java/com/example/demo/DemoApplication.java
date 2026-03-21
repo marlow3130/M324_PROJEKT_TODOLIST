@@ -6,8 +6,11 @@ import java.util.List;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -74,6 +77,27 @@ public class DemoApplication {
 			e.printStackTrace();
 		}
 		return "redirect:/";
+	}
+
+	/**
+	 * DELETE /tasks/{id} - Loescht einen Task anhand seiner eindeutigen ID.
+	 * Gibt 200 OK bei Erfolg oder 404 Not Found zurueck.
+	 */
+	@CrossOrigin
+	@DeleteMapping("/tasks/{id}")
+	public ResponseEntity<String> deleteTaskById(@PathVariable String id) {
+		System.out.println("API EP 'DELETE /tasks/" + id + "'");
+		Iterator<Task> it = tasks.iterator();
+		while (it.hasNext()) {
+			Task t = it.next();
+			if (t.getTaskdescription().equals(id)) {
+				System.out.println("...deleting task by id: '" + t.getTaskdescription() + "'");
+				it.remove();
+				return ResponseEntity.ok("deleted");
+			}
+		}
+		System.out.println(">>>task with id '" + id + "' not found!");
+		return ResponseEntity.notFound().build();
 	}
 
 	@CrossOrigin
