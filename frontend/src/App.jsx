@@ -108,6 +108,8 @@ function App() {
     .then(response => {
       console.log("Receiving answer after deleting on Spring-Server: ");
       console.log(response);
+      // State direkt lokal aktualisieren ohne erneuten Page-reload oder Server-Refetch
+      setTodos((prevTodos) => prevTodos.filter((todo) => todo.taskdescription !== taskdescription));
       setCompletedTasks((prevCompletedTasks) => {
         const nextCompletedTasks = { ...prevCompletedTasks };
         delete nextCompletedTasks[taskdescription];
@@ -118,7 +120,6 @@ function App() {
         delete nextSelectedTasks[taskdescription];
         return nextSelectedTasks;
       });
-      loadTodos();
     })
     .catch(error => console.log(error))
   }
