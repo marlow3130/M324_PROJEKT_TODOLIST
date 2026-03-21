@@ -39,6 +39,7 @@ public class DemoApplication {
 	}
 
 	private List<Task> tasks = new ArrayList<>();
+	private List<Task> taskHistory = new ArrayList<>();
 
 	@CrossOrigin
 	@GetMapping("/")
@@ -74,6 +75,22 @@ public class DemoApplication {
 			e.printStackTrace();
 		}
 		return "redirect:/";
+	}
+
+	/**
+	 * GET /tasks/history - Gibt alle erledigten Tasks zurueck,
+	 * sortiert nach Abschlusszeitpunkt (neueste zuerst).
+	 */
+	@CrossOrigin
+	@GetMapping("/tasks/history")
+	public List<Task> getTaskHistory() {
+		System.out.println("API EP '/tasks/history' returns history of size " + taskHistory.size() + ".");
+		List<Task> sortedHistory = new ArrayList<>(taskHistory);
+		sortedHistory.sort((a, b) -> {
+			if (a.getTaskdescription() == null || b.getTaskdescription() == null) return 0;
+			return b.getTaskdescription().compareTo(a.getTaskdescription());
+		});
+		return sortedHistory;
 	}
 
 	@CrossOrigin
