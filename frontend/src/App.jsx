@@ -156,6 +156,11 @@ function App() {
     }));
   }
 
+  /**
+   * "Alle auswaehlen"-Checkbox: Waehlt alle Tasks auf einmal aus
+   * oder hebt die Auswahl komplett auf (Toggle-Verhalten).
+   * Wenn bereits alle ausgewaehlt sind, wird die Auswahl zurueckgesetzt.
+   */
   const handleToggleSelectAll = () => {
     const allSelected = todos.length > 0 && todos.every((todo) => selectedTasks[todo.taskdescription]);
 

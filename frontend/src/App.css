@@ -48,10 +48,26 @@
   margin: 1rem 0 0.7rem;
 }
 
+/* "Alle auswaehlen"-Checkbox Styling */
 .select-all-control {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
+  cursor: pointer;
+  padding: 0.3rem 0.5rem;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.select-all-control:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.select-all-control input[type="checkbox"] {
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: #1565c0;
+  cursor: pointer;
 }
 
 .selected-count {
