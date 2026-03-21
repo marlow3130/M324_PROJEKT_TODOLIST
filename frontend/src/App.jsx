@@ -97,6 +97,11 @@ function App() {
   ** In this case if the task with the unique taskdescription is found on the server, it will be removed from the list.
   */
   const handleDelete = (taskdescription) => {
+    // Bestaetigungsdialog vor dem endgueltigen Loeschen anzeigen
+    const confirmed = window.confirm(`Willst du "${taskdescription}" wirklich loeschen?`);
+    if (!confirmed) {
+      return; // Abbruch, wenn Benutzer nicht bestaetigt
+    }
     console.log("Sending task description to delete on Spring-Server: "+taskdescription);
     fetch(`http://localhost:8080/delete`, { // API endpoint (the complete URL!) to delete an existing taskdescription in the list
       method: "POST",
