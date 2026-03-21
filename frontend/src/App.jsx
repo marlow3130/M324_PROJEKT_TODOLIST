@@ -149,6 +149,10 @@ function App() {
     });
   }
 
+  /**
+   * Checkbox pro Task fuer Einzelauswahl - ermoeglicht das Auswaehlen
+   * einzelner Tasks per Checkbox fuer spaetere Gruppenaktionen.
+   */
   const handleToggleSelect = (taskdescription) => {
     setSelectedTasks((prevSelectedTasks) => ({
       ...prevSelectedTasks,
