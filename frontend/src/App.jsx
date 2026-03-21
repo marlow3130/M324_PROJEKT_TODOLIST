@@ -52,19 +52,33 @@ function App() {
   */
   const handleSubmit = event => {
     event.preventDefault();
-    console.log("Sending task description to Spring-Server: "+taskdescription);
+    const normalizedTaskdescription = taskdescription.trim();
+
+    if (!normalizedTaskdescription) {
+      return;
+    }
+
+    setTodos((prevTodos) => {
+      if (prevTodos.some((todo) => todo.taskdescription === normalizedTaskdescription)) {
+        return prevTodos;
+      }
+      return [...prevTodos, { taskdescription: normalizedTaskdescription }];
+    });
+
+    setTaskdescription("");
+
+    console.log("Sending task description to Spring-Server: " + normalizedTaskdescription);
     fetch("http://localhost:8080/tasks", {  // API endpoint (the complete URL!) to save a taskdescription
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ taskdescription: taskdescription }) // both 'taskdescription' are identical to Task-Class attribute in Spring
+      body: JSON.stringify({ taskdescription: normalizedTaskdescription }) // both 'taskdescription' are identical to Task-Class attribute in Spring
     })
     .then(response => {
       console.log("Receiving answer after sending to Spring-Server: ");
       console.log(response);
       loadTodos();
-      setTaskdescription("");             // clear input field, preparing it for the next input
     })
     .catch(error => console.log(error))
   }
@@ -338,13 +352,14 @@ function App() {
           ToDo Liste
         </h1>
         <form onSubmit={handleSubmit} className='todo-form'>
-          <label htmlFor="taskdescription">Neues Todo anlegen:</label>
+          <label htmlFor="taskdescription">Neue Aufgabe hinzufügen</label>
           <input
+            id="taskdescription"
             type="text"
             value={taskdescription}
             onChange={handleChange}
           />
-          <button type="submit">Absenden</button>
+          <button type="submit">Hinzufügen</button>
         </form>
         <div>
           {renderTasks(todos)}
