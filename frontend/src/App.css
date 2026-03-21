@@ -65,17 +65,24 @@
   gap: 0.45rem;
 }
 
+/* Bulk-Action Buttons: disabled wenn keine Auswahl vorhanden */
 .bulk-btn {
   padding: 0.3rem 0.55rem;
   border: none;
   border-radius: 6px;
   color: #fff;
   cursor: pointer;
+  transition: opacity 0.2s, background 0.2s, transform 0.1s;
+}
+
+.bulk-btn:active:not(:disabled) {
+  transform: scale(0.97);
 }
 
 .bulk-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
+  filter: grayscale(0.3);
 }
 
 .bulk-done {

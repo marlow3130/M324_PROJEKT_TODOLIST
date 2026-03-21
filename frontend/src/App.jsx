@@ -201,12 +201,25 @@ function App() {
     setSelectedTasks({});
   }
 
+  /**
+   * "Ausgewaehlte loeschen"-Button Handler.
+   * Ist disabled wenn keine Tasks ausgewaehlt sind (selectedCount === 0).
+   * Zeigt vor dem Loeschen eine Bestaetigungsmeldung mit der Anzahl der Tasks.
+   */
   const handleDeleteSelected = () => {
     const selectedTaskDescriptions = todos
       .filter((todo) => selectedTasks[todo.taskdescription])
       .map((todo) => todo.taskdescription);
 
     if (selectedTaskDescriptions.length === 0) {
+      return;
+    }
+
+    // Sicherheitsabfrage vor dem Loeschen mehrerer Tasks
+    const confirmed = window.confirm(
+      `Willst du wirklich ${selectedTaskDescriptions.length} ausgewaehlte Task(s) loeschen?`
+    );
+    if (!confirmed) {
       return;
     }
 
