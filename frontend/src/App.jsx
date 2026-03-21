@@ -132,11 +132,13 @@ function App() {
           if (prevHistory.some((entry) => entry.taskdescription === taskdescription)) {
             return prevHistory;
           }
+          const now = new Date();
           return [
             ...prevHistory,
             {
               taskdescription,
-              completedAt: new Date().toLocaleString("de-CH")
+              completedAt: now.toLocaleString("de-CH"),
+              sortKey: now.toISOString()
             }
           ];
         });
@@ -180,7 +182,9 @@ function App() {
       return;
     }
 
-    const completedAt = new Date().toLocaleString("de-CH");
+    const now = new Date();
+    const completedAt = now.toLocaleString("de-CH");
+    const sortKey = now.toISOString();
 
     setCompletedTasks((prevCompletedTasks) => {
       const nextCompletedTasks = { ...prevCompletedTasks };
@@ -194,7 +198,7 @@ function App() {
       const alreadyInHistory = new Set(prevHistory.map((entry) => entry.taskdescription));
       const newEntries = selectedTaskDescriptions
         .filter((taskdescription) => !alreadyInHistory.has(taskdescription))
-        .map((taskdescription) => ({ taskdescription, completedAt }));
+        .map((taskdescription) => ({ taskdescription, completedAt, sortKey }));
       return [...prevHistory, ...newEntries];
     });
 
@@ -313,14 +317,25 @@ function App() {
     );
   }
 
+  /**
+   * History-Liste nach Zeitstempel sortiert anzeigen (neueste zuerst).
+   * Jeder Eintrag zeigt Taskbeschreibung und Abschlusszeitpunkt.
+   */
   const renderHistory = (history) => {
     if (history.length === 0) {
       return <p className="history-empty">Noch keine erledigten Todos.</p>;
     }
 
+    // Sortierung: neueste Eintraege zuerst (absteigend nach completedAt)
+    const sortedHistory = [...history].sort((a, b) => {
+      const dateA = new Date(a.sortKey || a.completedAt);
+      const dateB = new Date(b.sortKey || b.completedAt);
+      return dateB - dateA;
+    });
+
     return (
       <ul className="history-list">
-        {history.map((entry, index) => (
+        {sortedHistory.map((entry, index) => (
           <li key={`${entry.taskdescription}-${entry.completedAt}`}>
             <span>{`${index + 1}. ${entry.taskdescription}`}</span>
             <span className="history-time">{entry.completedAt}</span>
