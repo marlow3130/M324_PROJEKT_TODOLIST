@@ -7,6 +7,7 @@ function App() {
   const [taskdescription, setTaskdescription] = useState("");
   const [completedTasks, setCompletedTasks] = useState({});
   const [selectedTasks, setSelectedTasks] = useState({});
+  const [activeTab, setActiveTab] = useState("todos"); // "todos" oder "history"
   const [completedHistory, setCompletedHistory] = useState(() => {
     const historyFromStorage = localStorage.getItem("completedHistory");
     if (!historyFromStorage) {
@@ -337,22 +338,46 @@ function App() {
         <h1>
           ToDo Liste
         </h1>
-        <form onSubmit={handleSubmit} className='todo-form'>
-          <label htmlFor="taskdescription">Neues Todo anlegen:</label>
-          <input
-            type="text"
-            value={taskdescription}
-            onChange={handleChange}
-          />
-          <button type="submit">Absenden</button>
-        </form>
-        <div>
-          {renderTasks(todos)}
-        </div>
-        <section className="history-section">
-          <h2>ToDo History</h2>
-          {renderHistory(completedHistory)}
-        </section>
+        <nav className="tab-navigation">
+          <button
+            type="button"
+            className={`tab-btn ${activeTab === "todos" ? "tab-active" : ""}`}
+            onClick={() => setActiveTab("todos")}
+          >
+            Todos
+          </button>
+          <button
+            type="button"
+            className={`tab-btn ${activeTab === "history" ? "tab-active" : ""}`}
+            onClick={() => setActiveTab("history")}
+          >
+            History
+          </button>
+        </nav>
+
+        {activeTab === "todos" && (
+          <>
+            <form onSubmit={handleSubmit} className='todo-form'>
+              <label htmlFor="taskdescription">Neues Todo anlegen:</label>
+              <input
+                type="text"
+                value={taskdescription}
+                onChange={handleChange}
+              />
+              <button type="submit">Absenden</button>
+            </form>
+            <div>
+              {renderTasks(todos)}
+            </div>
+          </>
+        )}
+
+        {activeTab === "history" && (
+          <section className="history-section">
+            <h2>ToDo History</h2>
+            {renderHistory(completedHistory)}
+          </section>
+        )}
       </header>
     </div>
   );
