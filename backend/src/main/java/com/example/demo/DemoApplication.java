@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -74,6 +75,31 @@ public class DemoApplication {
 			e.printStackTrace();
 		}
 		return "redirect:/";
+	}
+
+	/**
+	 * DELETE /tasks/batch - Loescht mehrere Tasks anhand einer Liste von Taskbeschreibungen.
+	 * Erwartet eine JSON-Liste von Strings im Request-Body, z.B. ["Task1", "Task2"].
+	 */
+	@CrossOrigin
+	@DeleteMapping("/tasks/batch")
+	public String deleteTasksBatch(@RequestBody List<String> taskDescriptions) {
+		System.out.println("API EP 'DELETE /tasks/batch': " + taskDescriptions);
+		int removedCount = 0;
+		for (String desc : taskDescriptions) {
+			Iterator<Task> it = tasks.iterator();
+			while (it.hasNext()) {
+				Task t = it.next();
+				if (t.getTaskdescription().equals(desc)) {
+					System.out.println("...batch-deleting task: '" + desc + "'");
+					it.remove();
+					removedCount++;
+					break;
+				}
+			}
+		}
+		System.out.println("Batch-Delete: " + removedCount + " Tasks geloescht.");
+		return "deleted " + removedCount + " tasks";
 	}
 
 	@CrossOrigin
