@@ -1,0 +1,45 @@
+name: Pipeline Deploy
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  frontend-build:
+    name: Frontend Build (React)
+    runs-on: ubuntu-latest
+    container:
+      image: node:20-alpine
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend assets
+        run: npm run build
+
+  backend-build:
+    name: Backend Build (WAR)
+    runs-on: ubuntu-latest
+    container:
+      image: maven:3.9.9-eclipse-temurin-17
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build WAR file
+        run: mvn -B clean package -DskipTests
+
+      - name: Verify WAR artifact exists
+        run: ls target/*.war
