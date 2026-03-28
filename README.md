@@ -30,6 +30,33 @@ Kommentaren vor allem in App.js zu finden.
 2. Klickt man auf den *Done*-Button eines Tasks wird dieser aus der Liste entfernt (und natürlich auch von Backend-Server).
 3. Die Task Beschreibungen müssen eindeutig (bzw. einmalig) sein.
 
+## CI/CD Pipelines
+
+Das Projekt verwendet zwei getrennte GitHub Actions Pipelines:
+
+### 1. Test-Pipeline (`tests-pipeline.yml`)
+
+- **Trigger:** Push oder Pull Request auf den `pipeline`-Branch
+- **Jobs:**
+  - **Backend Maven Tests** – führt `./mvnw test` im Container mit Java 21 (Temurin) aus
+  - **Frontend Jest Tests** – führt `npm run test:ci` im Container mit Node.js 20 aus
+
+### 2. Deploy-Pipeline (`deploy-pipeline.yml`)
+
+- **Trigger:** Jeder Pull Request (alle Branches) und manuell via `workflow_dispatch`
+- **Jobs:**
+  - **Frontend Build (React)** – im `node:20-alpine` Container werden mit `npm ci` die Abhängigkeiten installiert und mit `npm run build` (Vite) die produktionsreifen HTML/JS/CSS-Dateien generiert
+  - **Backend Build (WAR)** – im `maven:3.9.9-eclipse-temurin-17` Container wird mit `mvn -B clean package -DskipTests` ein WAR-File erzeugt
+
+### Pipeline testen
+
+Um die Deploy-Pipeline zu testen, muss ein Pull Request erstellt werden:
+
+1. Neuen Branch erstellen und Änderungen committen
+2. Branch pushen
+3. Pull Request auf GitHub erstellen
+4. Unter dem Tab **Actions** prüfen, ob beide Pipeline-Jobs (Frontend Build, Backend Build) erfolgreich durchlaufen
+
 ### Anstehende Aufgaben
 
 - Erweiterung der Funktionalität durch die Lernenden
