@@ -41,25 +41,25 @@ class DemoApplicationTests {
 
 	@Test
 	void addTaskShouldStoreOnlyUniqueTasks() {
-		DemoApplication app = new DemoApplication();
+		TaskControllerV1 controller = new TaskControllerV1();
 
-		app.addTask("{\"taskdescription\":\"Backend Test\"}");
-		app.addTask("{\"taskdescription\":\"Backend Test\"}");
+		controller.addTask("{\"taskdescription\":\"Backend Test\"}");
+		controller.addTask("{\"taskdescription\":\"Backend Test\"}");
 
-		assertEquals(1, app.getTasks().size(), "Doppelte Task-Beschreibungen sollen ignoriert werden.");
-		assertEquals("Backend Test", app.getTasks().get(0).getTaskdescription());
+		assertEquals(1, controller.getTasks().size(), "Doppelte Task-Beschreibungen sollen ignoriert werden.");
+		assertEquals("Backend Test", controller.getTasks().get(0).getTaskdescription());
 	}
 
 	@Test
 	void deleteTaskShouldRemoveTaskFromList() {
-		DemoApplication app = new DemoApplication();
+		TaskControllerV1 controller = new TaskControllerV1();
 
-		app.addTask("{\"taskdescription\":\"Task fuer Delete\"}");
-		assertEquals(1, app.getTasks().size());
+		controller.addTask("{\"taskdescription\":\"Task fuer Delete\"}");
+		assertEquals(1, controller.getTasks().size());
 
-		app.delTask("{\"taskdescription\":\"Task fuer Delete\"}");
+		controller.delTask("{\"taskdescription\":\"Task fuer Delete\"}");
 
-		assertTrue(app.getTasks().isEmpty(), "Task soll nach Delete nicht mehr vorhanden sein.");
+		assertTrue(controller.getTasks().isEmpty(), "Task soll nach Delete nicht mehr vorhanden sein.");
 	}
 
 	@Test

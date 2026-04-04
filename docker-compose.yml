@@ -1,11 +1,13 @@
 services:
   backend:
     image: ghcr.io/marlow3130/m324-todolist-backend:latest
+    build: ./backend
     ports:
       - "8080:8080"
 
   frontend:
     image: ghcr.io/marlow3130/m324-todolist-frontend:latest
+    build: ./frontend
     ports:
       - "5173:80"
     depends_on:
