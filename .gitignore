@@ -1,0 +1,7 @@
+# Docker
+*.tar
+*.img
+docker-compose.override.yml
+
+# Word-Dokumente (lokale Arbeitsjournale)
+*.docx
