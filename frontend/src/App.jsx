@@ -21,7 +21,7 @@ function App() {
   });
 
   const loadTodos = () => {
-    fetch("http://localhost:8080/")
+    fetch("http://localhost:8080/api/v1/tasks")
       .then(response => response.json())
       .then(data => {
         setTodos(data);
@@ -68,7 +68,7 @@ function App() {
     setTaskdescription("");
 
     console.log("Sending task description to Spring-Server: " + normalizedTaskdescription);
-    fetch("http://localhost:8080/tasks", {  // API endpoint (the complete URL!) to save a taskdescription
+    fetch("http://localhost:8080/api/v1/tasks", {  // API endpoint (the complete URL!) to save a taskdescription
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -112,7 +112,7 @@ function App() {
   */
   const handleDelete = (taskdescription) => {
     console.log("Sending task description to delete on Spring-Server: "+taskdescription);
-    fetch(`http://localhost:8080/delete`, { // API endpoint (the complete URL!) to delete an existing taskdescription in the list
+    fetch(`http://localhost:8080/api/v1/delete`, { // API endpoint (the complete URL!) to delete an existing taskdescription in the list
       method: "POST",
       body: JSON.stringify({ taskdescription: taskdescription }),
       headers: {
@@ -226,7 +226,7 @@ function App() {
 
     Promise.all(
       selectedTaskDescriptions.map((taskdescription) =>
-        fetch("http://localhost:8080/delete", {
+        fetch("http://localhost:8080/api/v1/delete", {
           method: "POST",
           body: JSON.stringify({ taskdescription }),
           headers: {
